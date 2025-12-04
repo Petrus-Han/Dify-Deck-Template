@@ -16,7 +16,30 @@ This is a **template branch** for creating slide decks using the Dify Training D
 
 3. **Open your browser** at `http://localhost:3000`
 
-## How to Create Your Own Deck
+## 🤖 Vibe Coding (Recommended Workflow)
+
+This project is designed to be **AI-Native**. **You should NOT write the slide code manually.**
+Instead, use AI IDEs like **Cursor**, **Windsurf**, or **Copilot** to generate the deck for you.
+
+### How to "Vibe" Your Deck
+
+1. **Draft your ideas** in `TEMPLATE.md` (or just have a rough outline in your head).
+2. **Open Cursor Composer** (Cmd+I / Ctrl+I).
+3. **Prompt the AI**:
+
+   > "Create a new slide deck in `src/contents/product-launch`. Use the content from `TEMPLATE.md`. Reference `src/engine/types.ts` for available slide types and `src/contents/all-styles-en/index.tsx` for examples. Ensure the design follows `prompt/dify_deck_style_en.md`."
+
+4. **Watch the magic happen**. The AI will:
+   - Create the directory.
+   - Generate `index.tsx` with all your slides.
+   - Import necessary icons and components.
+   - Auto-format the layout.
+
+5. **Register it**: Ask the AI to "Register this new deck in `registry.ts`".
+
+**That's it. Zero manual coding required.**
+
+## How to Create Your Own Deck (Manual Way)
 
 ### Step 1: Create Your Content Folder
 
