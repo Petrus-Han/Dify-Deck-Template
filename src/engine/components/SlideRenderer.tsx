@@ -19,51 +19,38 @@ interface SlideRendererProps {
   slide: SlideData;
 }
 
+type SlideComponent = React.FC<{ slide: SlideData }>;
+
+const SLIDE_COMPONENT_MAP: Record<SlideType, SlideComponent> = {
+  [SlideType.TITLE]: TitleSlide,
+  [SlideType.SECTION]: SectionSlide,
+  [SlideType.COURSE_OVERVIEW]: CourseOverviewSlide,
+  [SlideType.MACRO_FOCUS]: MacroFocusSlide,
+  [SlideType.CHAPTER_TITLE]: ChapterTitleSlide,
+  [SlideType.CONTENT]: ContentSlide,
+  [SlideType.CARDS]: CardSlide,
+  [SlideType.ACCORDION]: AccordionSlide,
+  [SlideType.SPLIT]: SplitSlide,
+  [SlideType.DIAGRAM]: DiagramSlide,
+  [SlideType.MATRIX]: MatrixSlide,
+  [SlideType.ADAPTIVE_CONTENT]: AdaptiveContentSlide,
+  [SlideType.PRICING]: PricingCardSlide,
+  [SlideType.LICENSE]: LicenseSlide,
+  [SlideType.FAQ]: FAQSlide,
+  [SlideType.FOCUS_COLS]: FocusColsSlide,
+  [SlideType.PILLARS]: PillarsSlide,
+  [SlideType.KEY_TAKEAWAYS]: KeyTakeawaysSlide,
+  [SlideType.STORY]: StorySlide,
+  [SlideType.PRESENTER]: PresenterSlide,
+  [SlideType.END]: EndSlide,
+};
+
 export const SlideRenderer: React.FC<SlideRendererProps> = ({ slide }) => {
-  switch (slide.type) {
-    case SlideType.TITLE:
-      return <TitleSlide slide={slide} />;
-    case SlideType.SECTION:
-      return <SectionSlide slide={slide} />;
-    case SlideType.COURSE_OVERVIEW:
-      return <CourseOverviewSlide slide={slide} />;
-    case SlideType.MACRO_FOCUS:
-      return <MacroFocusSlide slide={slide} />;
-    case SlideType.CHAPTER_TITLE:
-      return <ChapterTitleSlide slide={slide} />;
-    case SlideType.CONTENT:
-      return <ContentSlide slide={slide} />;
-    case SlideType.CARDS:
-      return <CardSlide slide={slide} />;
-    case SlideType.ACCORDION:
-      return <AccordionSlide slide={slide} />;
-    case SlideType.SPLIT:
-      return <SplitSlide slide={slide} />;
-    case SlideType.DIAGRAM:
-      return <DiagramSlide slide={slide} />;
-    case SlideType.MATRIX:
-      return <MatrixSlide slide={slide} />;
-    case SlideType.ADAPTIVE_CONTENT:
-      return <AdaptiveContentSlide slide={slide} />;
-    case SlideType.PRICING:
-      return <PricingCardSlide slide={slide} />;
-    case SlideType.LICENSE:
-      return <LicenseSlide slide={slide} />;
-    case SlideType.FAQ:
-      return <FAQSlide slide={slide} />;
-    case SlideType.FOCUS_COLS:
-      return <FocusColsSlide slide={slide} />;
-    case SlideType.PILLARS:
-      return <PillarsSlide slide={slide} />;
-    case SlideType.KEY_TAKEAWAYS:
-      return <KeyTakeawaysSlide slide={slide} />;
-    case SlideType.STORY:
-      return <StorySlide slide={slide} />;
-    case SlideType.PRESENTER:
-      return <PresenterSlide slide={slide} />;
-    case SlideType.END:
-      return <EndSlide slide={slide} />;
-    default:
-      return <div className="p-20 text-red-500 font-bold text-3xl">Unknown Slide Type: {slide.type}</div>;
+  const SlideComponent = SLIDE_COMPONENT_MAP[slide.type];
+  
+  if (!SlideComponent) {
+    return <div className="p-20 text-red-500 font-bold text-3xl">Unknown Slide Type: {slide.type}</div>;
   }
+  
+  return <SlideComponent slide={slide} />;
 };
