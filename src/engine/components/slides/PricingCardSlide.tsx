@@ -22,8 +22,8 @@ export const PricingCardSlide: React.FC<PricingCardSlideProps> = ({ slide }) => 
     <div className="flex flex-col h-full p-4 sm:p-6 md:p-8 lg:p-12">
       <SlideHeader title={slide.title} subtitle={slide.subtitle} variant="vertical-bar" />
       
-      <div className="flex-1 w-full overflow-y-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-stretch">
+      <div className="flex-1 w-full overflow-y-auto p-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-stretch pt-2 pr-2">
           {slide.items?.map((item, idx) => (
             <div 
               key={idx} 

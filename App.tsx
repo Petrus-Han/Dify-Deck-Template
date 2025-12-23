@@ -109,7 +109,7 @@ function SlideDeckApp() {
       };
 
       return (
-          <div className="w-screen h-screen flex flex-col items-center justify-center bg-black text-white font-sans p-8 relative">
+          <div className="h-screen w-full overflow-y-auto bg-black text-white font-sans relative">
               <div className="absolute top-6 right-6 flex items-center gap-3 z-[120]">
                 
                 {/* Discreet Logout Button - Top Right */}
@@ -125,7 +125,8 @@ function SlideDeckApp() {
                 </button>
               </div>
 
-              <div className="max-w-2xl w-full">
+              <div className="min-h-full flex flex-col items-center justify-center p-8">
+                  <div className="max-w-2xl w-full">
                   <div className="text-center mb-12">
                       <div className="h-20 flex items-center justify-center mx-auto mb-6">
                           <img src="/assets/icon/dify-logo-dark-mode.svg" alt="Dify" className="h-full w-auto drop-shadow-2xl" />
@@ -157,6 +158,7 @@ function SlideDeckApp() {
                       ))}
                   </div>
               </div>
+            </div>
           </div>
       );
   }
