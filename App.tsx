@@ -1,19 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { SlideRenderer } from './src/engine/components/SlideRenderer';
-import { ChevronLeft, ChevronRight, Maximize2, BookOpen, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, BookOpen, LogOut, Printer } from 'lucide-react';
 import { decks, getDeck } from './src/contents/registry';
 import { SlideData } from './src/engine/types';
 import { AUTHOR_INFO, COMPANY_INFO } from './src/contents/common';
-import { Watermark } from './src/engine/components/Watermark';
 
 function SlideDeckApp() {
-  // Get deck ID from URL query parameter (e.g., ?deck=201)
+  // Get deck ID and mode from URL query parameter (e.g., ?deck=201&mode=print)
   const searchParams = new URLSearchParams(window.location.search);
   const deckId = searchParams.get('deck');
-  
-  // Simulating user for watermark
-  const user = { email: 'template@dify.ai' };
-  
+  const mode = searchParams.get('mode'); // 'print' for PDF export mode
+
   const [currentDeck, setCurrentDeck] = useState(deckId ? getDeck(deckId) : undefined);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -163,11 +160,138 @@ function SlideDeckApp() {
       );
   }
 
-  const currentSlide = SLIDES[currentSlideIndex];
-  const progress = ((currentSlideIndex + 1) / SLIDES.length) * 100;
-
   // Constants for fixed info
   const AUTHOR_NAME = `${AUTHOR_INFO.name}`;
+
+  // ========== PRINT MODE ==========
+  // When mode=print, render all slides for PDF export
+  if (mode === 'print' && currentDeck) {
+    const printDeck = currentDeck;
+
+    return (
+      <div className="bg-white">
+        {/* Print-specific CSS */}
+        <style>{`
+          @media print {
+            @page {
+              size: landscape;
+              margin: 0;
+            }
+            body {
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+          .print-page {
+            break-after: always;
+            page-break-after: always;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background-color: white;
+          }
+          .print-page:last-child {
+            break-after: auto;
+            page-break-after: auto;
+          }
+          /* Hide scrollbar in print preview */
+          body::-webkit-scrollbar {
+            display: none;
+          }
+          body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}</style>
+
+        {/* Print Header - Instructions (hidden in actual print) */}
+        <div className="print:hidden bg-gray-900 text-white p-4 fixed top-0 left-0 right-0 z-50 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <img src="/assets/icon/dify-logo-dark-mode.svg" alt="Dify" className="h-6" />
+            <span className="font-bold">{printDeck.title}</span>
+            <span className="text-gray-400">|</span>
+            <span className="text-gray-400">{printDeck.slides.length} slides</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-400">Press <kbd className="px-2 py-1 bg-gray-700 rounded text-white font-mono text-xs">Ctrl+P</kbd> or <kbd className="px-2 py-1 bg-gray-700 rounded text-white font-mono text-xs">⌘+P</kbd> to save as PDF</span>
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-dify-blue text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-2"
+            >
+              <Printer size={16} />
+              Print / Save PDF
+            </button>
+            <button
+              onClick={() => window.close()}
+              className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        {/* Spacer for fixed header */}
+        <div className="print:hidden h-16"></div>
+
+        {/* Render All Slides */}
+        {printDeck.slides.map((slide, index) => {
+          const isDarkBackground =
+            slide.type === 'MACRO_FOCUS' ||
+            slide.type === 'SECTION' ||
+            slide.type === 'CHAPTER_TITLE';
+
+          const logoSrc = isDarkBackground
+            ? (slide.type === 'MACRO_FOCUS' ? '/assets/icon/dify-logo-dark-mode.svg' : '/assets/icon/dify-logo-white.svg')
+            : '/assets/icon/dify-logo.svg';
+
+          return (
+            <div key={slide.id} className="print-page">
+              {/* Main slide content */}
+              <SlideRenderer slide={slide} />
+
+              {/* TOP RIGHT: Logo */}
+              <div className="absolute top-6 right-8 z-50 pointer-events-none select-none">
+                <img src={logoSrc} alt="Dify Logo" className="h-8 w-auto" />
+              </div>
+
+              {/* BOTTOM LEFT: Deck Title */}
+              <div className={`absolute bottom-6 left-12 flex items-center gap-4 text-sm font-medium tracking-wide pointer-events-none select-none ${
+                  isDarkBackground ? 'text-white/80' : 'text-gray-500'
+              }`}>
+                 <span className="uppercase tracking-wider font-bold">{printDeck.title}</span>
+              </div>
+
+              {/* BOTTOM CENTER: Copyright */}
+              <div className={`absolute bottom-6 left-1/2 -translate-x-1/2 text-xs font-medium tracking-wide pointer-events-none select-none ${
+                  isDarkBackground ? 'text-white/50' : 'text-gray-400'
+              }`}>
+                 {COMPANY_INFO.copyright}
+              </div>
+
+              {/* BOTTOM RIGHT: Year, Speaker & Page Number */}
+              <div className="absolute bottom-6 right-12 flex items-center gap-6 pointer-events-none select-none">
+                <span className={`text-sm font-medium ${isDarkBackground ? 'text-white/70' : 'text-gray-400'}`}>
+                    {new Date().getFullYear()}
+                </span>
+                <span className={`h-4 w-px ${isDarkBackground ? 'bg-white/30' : 'bg-gray-300'}`}></span>
+                <span className={`text-sm font-medium ${isDarkBackground ? 'text-white/80' : 'text-gray-500'}`}>
+                    {AUTHOR_NAME}
+                </span>
+                <span className={`h-4 w-px ${isDarkBackground ? 'bg-white/30' : 'bg-gray-300'}`}></span>
+                <span className={`text-lg font-mono font-bold ${isDarkBackground ? 'text-white' : 'text-dify-blue'}`}>
+                  {index + 1} <span className={`${isDarkBackground ? 'text-white/50' : 'text-gray-300'} font-light`}>/</span> {printDeck.slides.length}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  const currentSlide = SLIDES[currentSlideIndex];
+  const progress = ((currentSlideIndex + 1) / SLIDES.length) * 100;
   
   const nonFullScreenStyle = {
     maxHeight: 'calc(100% - 32px)',
@@ -232,13 +356,23 @@ function SlideDeckApp() {
            </button>
            
            <div className="w-px h-4 sm:h-5 md:h-6 bg-gray-800 mx-1 sm:mx-1.5 md:mx-2 flex-shrink-0"></div>
-           
-           <button 
-             onClick={toggleFullScreen} 
+
+           <button
+             onClick={toggleFullScreen}
              className="p-1.5 sm:p-2 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition-colors flex-shrink-0"
              aria-label="Toggle fullscreen"
            >
              <Maximize2 size={16} className="sm:w-4 sm:h-4 md:w-5 md:h-5" />
+           </button>
+
+           {/* Print / Export PDF Button */}
+           <button
+             onClick={() => window.open(`?deck=${currentDeck.id}&mode=print`, '_blank')}
+             className="p-1.5 sm:p-2 hover:bg-gray-800 rounded text-gray-400 hover:text-white transition-colors flex-shrink-0"
+             aria-label="Print mode"
+             title="Print / Export PDF"
+           >
+             <Printer size={16} className="sm:w-4 sm:h-4 md:w-5 md:h-5" />
            </button>
         </div>
       </div>
@@ -258,13 +392,7 @@ function SlideDeckApp() {
            
            {/* Render specific slide content - Key ensures state resets on slide change */}
            <SlideRenderer key={currentSlide.id} slide={currentSlide} />
-           
-           {/* === WATERMARK (Copyright Protection) === */}
-           <Watermark 
-             text={user?.email || 'preview@dify.ai'} 
-             isDark={isDarkBackground} 
-           />
-           
+
            {/* === OVERLAYS (Always visible) === */}
            <>
                 {/* TOP RIGHT: Logo */}
